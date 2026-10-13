@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detective Quest: The Vanished Star</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: #16213e;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 800px;
+            width: 100%;
+            padding: 30px;
+            border: 1px solid #0f3460;
+        }
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        h1 { color: #e94560; text-align: center; margin-bottom: 10px; font-size: 32px; text-transform: uppercase; letter-spacing: 1px; }
+        h2 { color: #0f3460; background: #e94560; color: white; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 20px; text-align: center; }
+        
+        .quest-image {
+            width: 100%;
+            border-radius: 12px;
+            margin: 15px 0;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            border: 2px solid #0f3460;
+            object-fit: cover;
+            max-height: 350px;
+            display: block;
+        }
+
+        .character-box {
+            background: #0f3460;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #e94560;
+            font-style: italic;
+        }
+        .text { font-size: 18px; line-height: 1.6; margin: 15px 0; color: #ccc; }
+        .text-center { text-align: center; }
+        
+        .timer-bar {
+            width: 100%;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        .timer-fill {
+            height: 100%;
+            background: #e94560;
+            width: 100%;
+            transition: width 1s linear;
+        }
+        
+        .option {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background: #1a1a2e;
+            border: 2px solid #0f3460;
+            border-radius: 10px;
+            color: #e0e0e0;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+        .option:hover { border-color: #e94560; background: #252545; transform: translateX(5px); }
+        .option:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .feedback {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: none;
+            font-weight: bold;
+        }
+        .feedback.show { display: block; animation: fadeIn 0.3s; }
+        .feedback.good { background: #1b4332; color: #d8f3dc; border-left: 4px solid #40916c; }
+        .feedback.bad { background: #641220; color: #ffc8dd; border-left: 4px solid #e94560; }
+        
+        .next-btn {
+            display: none;
+            width: 100%;
+            padding: 15px;
+            background: #e94560;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .next-btn.show { display: block; }
+        .next-btn:hover { background: #c73650; transform: scale(1.02); }
+
+        .start-btn {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(233, 69, 96, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(233, 69, 96, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(233, 69, 96, 0); }
+        }
+
+        .ending-box {
+            text-align: center;
+            padding: 30px;
+            background: #0f3460;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        .score-display { font-size: 24px; color: #e94560; margin: 20px 0; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- START SCREEN -->
+        <div id="startScreen" class="screen active">
+            <h1>🕵️ The Case of the Vanished Star</h1>
+            <img src="https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=1000&auto=format&fit=crop" alt="Detective Theater" class="quest-image" style="max-height: 300px;">
+            <div class="text text-center">
+                <p>Welcome, Detective. The school play premieres in 2 hours, but the lead actor has vanished.</p>
+                <p><strong>Your Mission:</strong> Find the actor, analyze the characters, and resolve the conflict before the curtain rises.</p>
+            </div>
+            <div class="character-box">
+                <strong>📜 Rules of the Investigation:</strong><br>
+                • You have <strong>30 seconds</strong> to make a decision in each scene.<br>
+                • Your choices affect your <strong>Empathy</strong> and <strong>Logic</strong> scores.<br>
+                • There are <strong>3 different endings</strong> based on your total score.<br>
+                • Choose wisely: in conflicts, words can heal or destroy relationships.
+            </div>
+            <button class="next-btn show start-btn" onclick="startGame()">🔍 Start Investigation</button>
+        </div>
+
+        <!-- SCENE 1: The Briefing -->
+        <div id="scene1" class="screen">
+            <h2>Scene 1: The Briefing</h2>
+            <img src="https://giga.chat/files/public/generated/ac9de58d-a50f-40f1-86fb-8a4ef74f7c82" alt="Sarah looking anxious" class="quest-image">
+            <div class="text">
+                You meet the actor's sister, <strong>Sarah</strong>. She looks <em>anxious</em>, with tired eyes and a messy hoodie.
+            </div>
+            <div class="character-box">
+                <strong>Sarah:</strong> "Alex is very <em>sensitive</em> and <em>insecure</em>. He hates being criticized in public. He had a fight with the director yesterday."
+            </div>
+            <div class="timer-bar"><div class="timer-fill" id="timer1"></div></div>
+            <div class="option" onclick="choose(1, 'A', 1, 1)">A) "Don't worry, Sarah. Tell me exactly what they argued about. I will find him."</div>
+            <div class="option" onclick="choose(1, 'B', 0, 0)">B) "He is just being dramatic and stubborn. Where did he go?"</div>
+            <div class="option" onclick="choose(1, 'C', 1, 0)">C) "I understand you are worried. Let's sit down. What makes Alex feel upset usually?"</div>
+            <div id="feedback1" class="feedback"></div>
+            <button id="next1" class="next-btn" onclick="goTo(2)">Next Scene →</button>
+        </div>
+
+        <!-- SCENE 2: The Dressing Room -->
+        <div id="scene2" class="screen">
+            <h2>Scene 2: The Dressing Room</h2>
+            <img src="https://giga.chat/files/public/generated/98364925-b874-47d6-b704-e48c22937d32" alt="Messy dressing room with a note" class="quest-image">
+            <div class="text">
+                You enter Alex's dressing room. It's a mess. On the mirror, there is a note written in shaky handwriting: 
+                <em>"I can't do this anymore. They don't appreciate me. I'm just a backup."</em>
+            </div>
+            <div class="timer-bar"><div class="timer-fill" id="timer2"></div></div>
+            <div class="text"><strong>What does this note tell you about Alex's current state of mind?</strong></div>
+            <div class="option" onclick="choose(2, 'A', 0, 1)">A) He is lazy and wants to quit his responsibilities.</div>
+            <div class="option" onclick="choose(2, 'B', 1, 1)">B) He feels undervalued and his self-confidence is broken.</div>
+            <div class="option" onclick="choose(2, 'C', 0, 0)">C) He is angry and wants to punish the director.</div>
+            <div id="feedback2" class="feedback"></div>
+            <button id="next2" class="next-btn" onclick="goTo(3)">Next Scene →</button>
+        </div>
+
+        <!-- SCENE 3: The Rival -->
+        <div id="scene3" class="screen">
+            <h2>Scene 3: The Rival</h2>
+            <img src="https://giga.chat/files/public/generated/19005ee3-3865-4819-814a-05d1168483ce" alt="Leo the charming rival" class="quest-image">
+            <div class="text">
+                You meet <strong>Leo</strong>, the understudy. He is <em>charming</em>, has perfectly styled hair, and wears an expensive watch. He smiles confidently.
+            </div>
+            <div class="character-box">
+                <strong>Leo:</strong> "Alex is just <em>irresponsible</em> and <em>jealous</em>. He knew I was better for the role. He ran away to ruin the play out of spite."
+            </div>
+            <div class="timer-bar"><div class="timer-fill" id="timer3"></div></div>
+            <div class="text"><strong>How do you react to Leo's statement?</strong></div>
+            <div class="option" onclick="choose(3, 'A', 0, 1)">A) "You are right. He is clearly just jealous of your talent."</div>
+            <div class="option" onclick="choose(3, 'B', 1, 1)">B) "That's a strong opinion. But Alex is sensitive, not spiteful. Why are you so eager to blame him?"</div>
+            <div class="option" onclick="choose(3, 'C', 0, 0)">C) "Stop talking. You are the main suspect."</div>
+            <div id="feedback3" class="feedback"></div>
+            <button id="next3" class="next-btn" onclick="goTo(4)">Next Scene →</button>
+        </div>
+
+        <!-- SCENE 4: The Director -->
+        <div id="scene4" class="screen">
+            <h2>Scene 4: The Director</h2>
+            <img src="https://giga.chat/files/public/generated/409d7772-22ec-4a6b-b7a6-4e0962aa7682" alt="Maya the strict director" class="quest-image">
+            <div class="text">
+                You find <strong>Maya</strong>, the director. She is <em>ambitious</em> and <em>strict</em>, holding a clipboard, looking stressed.
+            </div>
+            <div class="character-box">
+                <strong>Maya:</strong> "I just want the play to be perfect! Yes, I told him his acting was 'wooden' and 'unconvincing'. I am strict, not mean! He needs to toughen up."
+            </div>
+            <div class="timer-bar"><div class="timer-fill" id="timer4"></div></div>
+            <div class="text"><strong>What is the best way to de-escalate this conflict with Maya?</strong></div>
+            <div class="option" onclick="choose(4, 'A', 1, 1)">A) "I know you want perfection, Maya. But harsh words hurt sensitive people. We need to find him and apologize."</div>
+            <div class="option" onclick="choose(4, 'B', 0, 0)">B) "You are a terrible director. You ruined everything with your bad temper."</div>
+            <div class="option" onclick="choose(4, 'C', 0, 1)">C) "Just admit you were wrong so we can move on."</div>
+            <div id="feedback4" class="feedback"></div>
+            <button id="next4" class="next-btn" onclick="goTo(5)">Next Scene →</button>
+        </div>
+
+        <!-- SCENE 5: The Clue -->
+        <div id="scene5" class="screen">
+            <h2>Scene 5: The Clue</h2>
+            <img src="https://giga.chat/files/public/generated/2ec2f7b6-2c39-4598-b06b-499a1f67daab" alt="Smartphone with a text message clue" class="quest-image">
+            <div class="text">
+                You check Alex's phone (with Sarah's permission). His last message to a friend was: 
+                <em>"Going to the place where it's quiet. Need to think."</em>
+            </div>
+            <div class="timer-bar"><div class="timer-fill" id="timer5"></div></div>
+            <div class="text"><strong>Based on Alex's character (sensitive, needs quiet), where do you go first?</strong></div>
+            <div class="option" onclick="choose(5, 'A', 1, 1)">A) The old park bench near the lake. It's quiet and reflective.</div>
+            <div class="option" onclick="choose(5, 'B', 0, 0)">B) The noisy central cafe where everyone can see him.</div>
+            <div class="option" onclick="choose(5, 'C', 0, 1)">C) Leo's house, to confront him again.</div>
+            <div id="feedback5" class="feedback"></div>
+            <button id="next5" class="next-btn" onclick="goTo(6)">Next Scene →</button>
+        </div>
+
+        <!-- SCENE 6: The Discovery -->
+        <div id="scene6" class="screen">
+            <h2>Scene 6: The Discovery</h2>
+            <img src="https://giga.chat/files/public/generated/9b300b12-687a-4bc4-8e97-72e9bf88a341" alt="Alex sitting alone at the park" class="quest-image">
+            <div class="text">
+                You find Alex at the park. He is sitting alone, looking <em>miserable</em>. His messy dark hair is hidden under his favorite green scarf. He is crying quietly.
+            </div>
+            <div class="timer-bar"><div class="timer-fill" id="timer6"></div></div>
+            <div class="text"><strong>What is your first action?</strong></div>
+            <div class="option" onclick="choose(6, 'A', 1, 1)">A) Sit down quietly next to him, offer a tissue, and say: "I'm here to listen, no pressure."</div>
+            <div class="option" onclick="choose(6, 'B', 0, 0)">B) "Alex! The play is in 2 hours! Get up, we are leaving right now!"</div>
+            <div class="option" onclick="choose(6, 'C', 0, 1)">C) "Leo said you are just being dramatic. Is that true?"</div>
+            <div id="feedback6" class="feedback"></div>
+            <button id="next6" class="next-btn" onclick="goTo(7)">Next Scene →</button>
+        </div>
+
+        <!-- SCENE 7: The Confession -->
+        <div id="scene7" class="screen">
+            <h2>Scene 7: The Confession</h2>
+            <img src="https://giga.chat/files/public/generated/81276fab-ac34-4aea-8748-06ece09071f4" alt="Alex speaking, looking hurt" class="quest-image">
+            <div class="text">
+                Alex finally speaks: <em>"Maya said I was terrible. And then I saw Leo practicing my lines. He smiled at me. I feel useless and betrayed."</em>
+            </div>
+            <div class="timer-bar"><div class="timer-fill" id="timer7"></div></div>
+            <div class="text"><strong>How do you validate his feelings and encourage him?</strong></div>
+            <div class="option" onclick="choose(7, 'A', 1, 1)">A) "It's completely normal to feel hurt when someone criticizes you. But your talent is real. Let's talk to Maya together."</div>
+            <div class="option" onclick="choose(7, 'B', 0, 0)">B) "You shouldn't feel useless. Just ignore them and go on stage."</div>
+            <div class="option" onclick="choose(7, 'C', 0, 1)">C) "Maya is just stressed. You are overreacting."</div>
+            <div id="feedback7" class="feedback"></div>
+            <button id="next7" class="next-btn" onclick="goTo(8)">Next Scene →</button>
+        </div>
+
+        <!-- SCENE 8: The Confrontation -->
+        <div id="scene8" class="screen">
+            <h2>Scene 8: The Confrontation</h2>
+            <img src="https://giga.chat/files/public/generated/00386784-cd7d-4f5c-84c8-6983f92acd1c" alt="Tense confrontation between Maya, Leo, and Alex" class="quest-image">
+            <div class="text">
+                You bring Alex back to the school. Maya and Leo are there. Maya looks angry, Leo looks smug.
+            </div>
+            <div class="timer-bar"><div class="timer-fill" id="timer8"></div></div>
+            <div class="text"><strong>How do you mediate this conflict to find a compromise?</strong></div>
+            <div class="option" onclick="choose(8, 'A', 1, 1)">A) "Maya, your words hurt him. Leo, stop smiling, we know you provoked him. Let's find a solution where Alex feels safe to perform."</div>
+            <div class="option" onclick="choose(8, 'B', 0, 0)">B) "Alex, just apologize to Maya so we can start the play."</div>
+            <div class="option" onclick="choose(8, 'C', 0, 1)">C) "Leo should be the main actor now. Alex is too weak."</div>
+            <div id="feedback8" class="feedback"></div>
+            <button id="next8" class="next-btn" onclick="goTo(9)">Next Scene →</button>
+        </div>
+
+        <!-- SCENE 9: The Resolution Plan -->
+        <div id="scene9" class="screen">
+            <h2>Scene 9: The Resolution Plan</h2>
+            <img src="https://giga.chat/files/public/generated/898c11e0-870d-4036-b0b8-df2fda75e649" alt="Reaching a resolution and compromise" class="quest-image">
+            <div class="text">
+                The tension is high. You need a final plan to save the play and the relationships.
+            </div>
+            <div class="timer-bar"><div class="timer-fill" id="timer9"></div></div>
+            <div class="text"><strong>What is the most constructive solution?</strong></div>
+            <div class="option" onclick="choose(9, 'A', 1, 1)">A) Maya apologizes for her harsh tone. Alex agrees to perform, but with Leo supporting him backstage as a friend, not a rival.</div>
+            <div class="option" onclick="choose(9, 'B', 0, 0)">B) Cancel the play. The team is too toxic.</div>
+            <div class="option" onclick="choose(9, 'C', 0, 1)">C) Force Alex to go on stage without any apology from Maya.</div>
+            <div id="feedback9" class="feedback"></div>
+            <button id="next9" class="next-btn" onclick="goTo(10)">See the Ending →</button>
+        </div>
+
+        <!-- SCENE 10: The Endings -->
+        <div id="scene10" class="screen">
+            <h1>🎭 Case Closed</h1>
+            <img src="https://giga.chat/files/public/generated/6074dc0f-c6c6-4c6a-a4e1-cb02a5d2457c" alt="The final curtain call" class="quest-image">
+            <div class="ending-box">
+                <div class="score-display" id="finalScore"></div>
+                <div id="endingText" class="text" style="color: white; font-size: 20px;"></div>
+                <button class="next-btn show" onclick="location.reload()" style="margin-top: 30px;">🔄 Play Again</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let empathyScore = 0;
+        let logicScore = 0;
+        let timerInterval;
+        
+        const TIME_LIMIT = 30; 
+
+        const feedbackData = {
+            1: {
+                A: "Good balance of support and focus on facts. (+1 EP, +1 LP)",
+                B: "Calling him 'dramatic' shows a lack of empathy. (0 pts)",
+                C: "Very empathetic approach, builds trust immediately. (+1 EP)"
+            },
+            2: {
+                A: "Misinterpretation of his character. He is sensitive, not lazy. (+1 LP for trying, but wrong)",
+                B: "Perfect analysis of his emotional state based on the text. (+1 EP, +1 LP)",
+                C: "Too aggressive, ignores his vulnerability. (0 pts)"
+            },
+            3: {
+                A: "You fell for Leo's manipulation! He is charming but deceitful. (+1 LP for noticing something, but wrong choice)",
+                B: "Excellent! You saw through his charm and defended Alex's character. (+1 EP, +1 LP)",
+                C: "Too aggressive, shuts down communication. (0 pts)"
+            },
+            4: {
+                A: "Perfect mediation. You acknowledge her goal but correct her method. (+1 EP, +1 LP)",
+                B: "Attacking her will only make her more defensive. (0 pts)",
+                C: "Too blunt, lacks diplomatic skill. (+1 LP for logic, 0 EP)"
+            },
+            5: {
+                A: "Logical deduction based on his need for quiet. (+1 EP, +1 LP)",
+                B: "A noisy place is the last thing a sensitive, upset person needs. (0 pts)",
+                C: "Illogical, Leo is not a friend. (+1 LP for trying, but wrong)"
+            },
+            6: {
+                A: "Perfect active listening and empathy. (+1 EP, +1 LP)",
+                B: "Too demanding, ignores his emotional state. (0 pts)",
+                C: "Bringing up the rival will only hurt him more. (+1 LP for trying, 0 EP)"
+            },
+            7: {
+                A: "Validates his feelings and offers a constructive path forward. (+1 EP, +1 LP)",
+                B: "Dismissing his feelings ('shouldn't feel') is bad communication. (0 pts)",
+                C: "Invalidates his emotions completely. (+1 LP for trying, 0 EP)"
+            },
+            8: {
+                A: "Strong, fair mediation. Addresses both parties' faults and seeks compromise. (+1 EP, +1 LP)",
+                B: "Unfair to Alex, forces submission. (0 pts)",
+                C: "Destroys Alex's confidence completely. (+1 LP for trying, 0 EP)"
+            },
+            9: {
+                A: "The ideal conflict resolution: apology, compromise, and role redefinition. (+1 EP, +1 LP)",
+                B: "Giving up is not a solution. (0 pts)",
+                C: "Authoritarian and damaging to relationships. (+1 LP for trying, 0 EP)"
+            }
+        };
+
+        // Новая функция для запуска игры со стартового экрана
+        function startGame() {
+            document.getElementById('startScreen').classList.remove('active');
+            document.getElementById('scene1').classList.add('active');
+            startTimer(1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function startTimer(sceneNum) {
+            let timeLeft = TIME_LIMIT;
+            const timerFill = document.getElementById(`timer${sceneNum}`);
+            timerFill.style.width = '100%';
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerFill.style.width = `${(timeLeft / TIME_LIMIT) * 100}%`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeout(sceneNum);
+                }
+            }, 1000);
+        }
+
+        function handleTimeout(sceneNum) {
+            const options = document.querySelectorAll(`#scene${sceneNum} .option`);
+            options.forEach(opt => opt.disabled = true);
+            
+            const fb = document.getElementById(`feedback${sceneNum}`);
+            fb.className = "feedback bad show";
+            fb.innerHTML = "⏳ Time's up! In real life, hesitation can escalate a conflict. (0 points)";
+            document.getElementById(`next${sceneNum}`).classList.add("show");
+        }
+
+        function choose(sceneNum, choice, ep, lp) {
+            clearInterval(timerInterval);
+            empathyScore += ep;
+            logicScore += lp;
+            
+            const options = document.querySelectorAll(`#scene${sceneNum} .option`);
+            options.forEach(opt => opt.disabled = true);
+            
+            const fb = document.getElementById(`feedback${sceneNum}`);
+            if (ep + lp > 1) {
+                fb.className = "feedback good show";
+            } else if (ep + lp === 1) {
+                fb.className = "feedback good show"; 
+            } else {
+                fb.className = "feedback bad show";
+            }
+            fb.innerHTML = (ep + lp > 0 ? "✅ " : "❌ ") + feedbackData[sceneNum][choice];
+            
+            document.getElementById(`next${sceneNum}`).classList.add("show");
+        }
+
+        function goTo(sceneNum) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(`scene${sceneNum}`).classList.add('active');
+            
+            if (sceneNum < 10) {
+                startTimer(sceneNum);
+            } else {
+                showEnding();
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showEnding() {
+            const totalScore = empathyScore + logicScore;
+            const maxScore = 18; 
+            
+            document.getElementById('finalScore').innerHTML = `Empathy: ${empathyScore} | Logic: ${logicScore}<br>Total: ${totalScore} / ${maxScore}`;
+            
+            let ending = "";
+            if (totalScore >= 14) {
+                ending = `<h3 style="color:#40916c">🌟 Ending 1: The Perfect Mediator</h3>
+                <p>You successfully found Alex, validated his feelings, and resolved the conflict. Maya apologized for her harsh words, and Leo learned a lesson in humility. The play was a huge success, and the team's relationships are stronger than ever. You are a true Relationship Detective!</p>`;
+            } else if (totalScore >= 8) {
+                ending = `<h3 style="color:#f4a261">⚖️ Ending 2: The Cold Truth</h3>
+                <p>You found Alex and forced him to return, but the emotional wounds weren't fully healed. The play happened, but the tension between Alex, Maya, and Leo remains. You solved the case logically, but missed the opportunity to truly connect and heal the relationships.</p>`;
+            } else {
+                ending = `<h3 style="color:#e94560">💔 Ending 3: The Broken Curtain</h3>
+                <p>Your harsh words and poor choices pushed Alex further away. He refused to return, and the play was canceled. The team is broken, and trust is lost. Remember: in conflicts, empathy and careful observation are just as important as facts.</p>`;
+            }
+            
+            document.getElementById('endingText').innerHTML = ending;
+        }
+
+        // Убрали автоматический запуск таймера при загрузке страницы
+    </script>
+</body>
+</html>
